@@ -1,42 +1,7 @@
+require "./common"
+
 module SeriousAkin
-  enum Answer
-    Unknown
-    Yes
-    No
-    Incorrect
-  end
-
-  enum RoundStage
-    Question
-    Guess
-    Won
-    Lost
-  end
-
-  alias Item = String
-  alias Question = String
-
-  alias History = Hash(Question, Answer)
-  alias ItemSet = Set(Item)
-  alias Stats = Hash(Answer, Int32)
-
-  class Round
-    @history = History.new
-    @set = ItemSet.new
-    getter stage = RoundStage::Question
-    @db : Database
-
-    def initialize(@db)
-    end
-
-    def next_question(output : IO)
-    end
-
-    def process_input(input : IO)
-    end
-  end
-
-  class Database
+  class TrivialDatabase < Database
     getter data = Hash({Item, Question}, Answer).new(Answer::Unknown)
     getter all_questions = Set(Question).new
     getter all_items = Set(Item).new
@@ -55,12 +20,20 @@ module SeriousAkin
     end
 
     def best_question(set, history)
-      @all_questions.select { |q| history[q]? }.max_by do |q|
+      @all_questions.select { |q| history[q]? == nil }.max_by do |q|
         st = Stats.new(0)
         @data.each do |(item, q1), ans|
-          st[ans] += 1 if q1 == q && set.contain?(item)
+          st[ans] += 1 if q1 == q && set.includes?(item)
         end
         {st[Answer::Yes], st[Answer::No]}.min
+      end
+    end
+
+    def partition(set, question, answer)
+      @data.each do |(item, q1), ans|
+        next if q1 != question
+        next if ans == answer || ans == Answer::Unknown
+        set.delete item
       end
     end
   end

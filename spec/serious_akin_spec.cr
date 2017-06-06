@@ -4,7 +4,7 @@ include SeriousAkin
 describe SeriousAkin do
   # TODO: Write tests
 
-  db = Database.new
+  db = TrivialDatabase.new
 
   it "db add records" do
     db.add_record "кот", "длинный хвост"
@@ -24,6 +24,18 @@ describe SeriousAkin do
     db.data[{"кот", "длинный хвост"}].should eq Answer::Yes
   end
 
+  it "db update records" do
+    db.update_record "кот", {"длинный хвост" => Answer::Yes, "лает" => Answer::No}
+    db.data[{"кот", "лает"}].should eq Answer::No
+  end
+
   it "selects best question" do
+    db.best_question(["собака", "кот"].to_set, History.new).should eq "лает"
+  end
+
+  it "partition data sets" do
+    set = ["собака", "кот"].to_set
+    db.partition(set, "лает", Answer::No)
+    set.should eq ["кот"].to_set
   end
 end
