@@ -45,9 +45,7 @@ module SeriousAkin
       @all_items << item
       @all_questions << question
       @data[{item, question}] = Answer::Yes
-      history.each do |q, ans|
-        @data[{item, q}] = ans
-      end
+      update_record(item, history)
     end
 
     def update_record(item, history)

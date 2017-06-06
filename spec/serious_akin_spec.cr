@@ -23,4 +23,7 @@ describe SeriousAkin do
     db.data[{"кот", "лает"}].should eq Answer::Unknown
     db.data[{"кот", "длинный хвост"}].should eq Answer::Yes
   end
+
+  it "selects best question" do
+  end
 end
