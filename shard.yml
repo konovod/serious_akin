@@ -1,0 +1,13 @@
+name: serious_akin
+version: 0.1.0
+
+authors:
+  - Konovod <konovod@gmail.com>
+
+targets:
+  serious_akin:
+    main: src/serious_akin.cr
+
+crystal: 0.22.0
+
+license: MIT
