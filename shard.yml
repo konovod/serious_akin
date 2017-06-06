@@ -4,6 +4,11 @@ version: 0.1.0
 authors:
   - Konovod <konovod@gmail.com>
 
+dependencies:
+  kemal:
+    github: kemalcr/kemal
+    branch: master
+    
 targets:
   serious_akin:
     main: src/serious_akin.cr
