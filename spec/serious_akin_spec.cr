@@ -37,5 +37,9 @@ describe SeriousAkin do
     set = ["собака", "кот"].to_set
     db.partition(set, "лает", Answer::No)
     set.should eq ["кот"].to_set
+    db.partition(set, "лает", Answer::Yes)
+    set.empty?.should be_true
+    db.partition(set, "лает", Answer::No)
+    set.empty?.should be_true
   end
 end
