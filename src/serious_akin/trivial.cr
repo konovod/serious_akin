@@ -2,7 +2,7 @@ require "./common"
 
 module SeriousAkin
   class TrivialDatabase < Database
-    class property instance : TrivialDatabase
+    class_property instance : TrivialDatabase?
     getter data = Hash({Item, Question}, Answer).new(Answer::Unknown)
     getter all_questions = Set(Question).new
     getter all_items = Set(Item).new

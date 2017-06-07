@@ -29,12 +29,12 @@ def do_next_question(env, obj)
 end
 
 get "/start" do |env|
-  obj = UserStorableObject.new(SeriousAkin::History.new)
+  obj = SeriousAkin::Round.new
   do_next_question(env, obj)
 end
 
 get "/answer/:ans" do |env|
-  obj = env.session.object("history").as(UserStorableObject)
+  obj = env.session.object("history").as(SeriousAkin::Round)
   obj.history[obj.last_question] =
     case env.params.url["ans"]
     when "yes"

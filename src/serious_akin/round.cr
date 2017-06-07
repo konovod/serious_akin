@@ -7,13 +7,13 @@ module SeriousAkin
     Question
     Guess
     Input
-    Win
+    Won
     Restart
   end
 
   alias Action = {ActionType, String}
 
-  RESTART = {RoundAction::Restart, ""}
+  RESTART = {ActionType::Restart, ""}
 
   class Round
     JSON.mapping({
@@ -23,10 +23,10 @@ module SeriousAkin
     })
     include Session::StorableObject
 
-    getter next_action = {RoundAction::Restart, ""}
+    getter next_action : Action = {ActionType::Restart, ""}
 
     def db
-      TrivialDatabase.instance
+      TrivialDatabase.instance.not_nil!
     end
 
     def initialize
@@ -37,15 +37,16 @@ module SeriousAkin
 
     def gen_set
       set = db.all_items
-      history.each { |q, ans| db.partition(set, q, and) }
+      history.each { |q, ans| db.partition(set, q, ans) }
+      set
     end
 
     def gen_next_question
       set = gen_set
       if set.size > 1
-        @next_action = {RoundAction::Question, db.best_question(set, history)}
+        @next_action = {ActionType::Question, db.best_question(set, history)}
       else
-        @next_action = {RoundAction::Guess, set.first || ""}
+        @next_action = {ActionType::Guess, set.first || ""}
       end
     end
 
@@ -54,16 +55,20 @@ module SeriousAkin
       gen_next_question
     end
 
+    def process_won
+      @next_action = RESTART
+    end
+
     def process_question(answer)
-      history[question] = ans
+      history[@last_action[1]] = answer
       gen_next_question
     end
 
     def process_guess(ok : Bool)
       if ok
-        @next_action = {RoundAction::Won, ""}
+        @next_action = {ActionType::Won, ""}
       else
-        @next_action = {RoundAction::Input, @last_action[1]}
+        @next_action = {ActionType::Input, @last_action[1]}
       end
     end
 
