@@ -2,56 +2,74 @@ require "kemal"
 require "kemal-session"
 require "secure_random"
 require "./serious_akin"
+require "./serious_akin"
 
 Session.config.secret = SecureRandom.hex(64)
 
+db = SeriousAkin::TrivialDatabase.new
+db.add_record "кот", "длинный хвост"
+SeriousAkin::TrivialDatabase.instance = db
+
 MAX_QUESTIONS = 20
 
-def do_question(env, obj, text)
-  obj.last_question = text
+def do_action(env, obj)
+  text = obj.next_action[1]
   env.session.object("history", obj)
-  render "src/views/question.ecr", "src/views/layout.ecr"
-end
-
-def do_input(env, obj, text)
-  obj.last_question = text
-  env.session.object("history", obj)
-  render "src/views/input.ecr", "src/views/layout.ecr"
-end
-
-def do_next_question(env, obj)
-  obj.counter += 1
-  if obj.counter < MAX_QUESTIONS
-    do_question(env, obj, "Вопрос #{obj.counter}/#{MAX_QUESTIONS}: RRRRR?")
+  case obj.next_action[0]
+  when .question?
+    render "src/views/question.ecr", "src/views/layout.ecr"
+  when .guess?
+    render "src/views/guess.ecr", "src/views/layout.ecr"
+  when .input?
+    render "src/views/input.ecr", "src/views/layout.ecr"
+  when .won?
+    render "src/views/won.ecr", "src/views/layout.ecr"
   else
-    do_guess(env, obj, "DONT KNOW")
+    env.session.destroy
+    obj = SeriousAkin::Round.new
+    text = obj.next_action[1]
+    env.session.object("history", obj)
+    render "src/views/question.ecr", "src/views/layout.ecr"
   end
 end
 
 get "/start" do |env|
   obj = SeriousAkin::Round.new
-  do_next_question(env, obj)
+  obj.process_start
+  do_action(env, obj)
 end
 
 get "/answer/:ans" do |env|
   obj = env.session.object("history").as(SeriousAkin::Round)
-  obj.history[obj.last_question] =
-    case env.params.url["ans"]
-    when "yes"
-      SeriousAkin::Answer::Yes
-    when "no"
-      SeriousAkin::Answer::No
-    else
-      SeriousAkin::Answer::Incorrect
-    end
-  do_next_question(env, obj)
+  ans = SeriousAkin::Answer.parse? env.params.url["ans"]
+  if ans
+    obj.process_question ans
+  end
+  do_action(env, obj)
+end
+
+get "/guess/:ans" do |env|
+  obj = env.session.object("history").as(SeriousAkin::Round)
+  ans = env.params.url["ans"] != "no"
+  if ans
+    obj.process_guess ans
+  end
+  do_action(env, obj)
+end
+
+get "/save" do |env|
+  obj = env.session.object("history").as(SeriousAkin::Round)
+  obj.process_input "what", "diff"
+  do_action(env, obj)
 end
 
 error 404 do
-  "This is a customized 404 page."
+  text = "Страница не найдена"
+  render "src/views/error.ecr", "src/views/layout.ecr"
 end
 error 403 do
-  "Access Forbidden!"
+  text = "Доступ запрещен"
+  render "src/views/error.ecr", "src/views/layout.ecr"
 end
 get "/" do |env|
   env.response.status_code = 403
