@@ -7,27 +7,13 @@ Session.config.secret = SecureRandom.hex(64)
 
 MAX_QUESTIONS = 20
 
-class UserStorableObject
-  JSON.mapping({
-    history:       SeriousAkin::History,
-    last_question: String,
-    counter:       Int32,
-  })
-  include Session::StorableObject
-
-  def initialize(@history)
-    @last_question = ""
-    @counter = 0
-  end
-end
-
 def do_question(env, obj, text)
   obj.last_question = text
   env.session.object("history", obj)
   render "src/views/question.ecr", "src/views/layout.ecr"
 end
 
-def do_guess(env, obj, text)
+def do_input(env, obj, text)
   obj.last_question = text
   env.session.object("history", obj)
   render "src/views/input.ecr", "src/views/layout.ecr"
@@ -59,6 +45,16 @@ get "/answer/:ans" do |env|
       SeriousAkin::Answer::Incorrect
     end
   do_next_question(env, obj)
+end
+
+error 404 do
+  "This is a customized 404 page."
+end
+error 403 do
+  "Access Forbidden!"
+end
+get "/" do |env|
+  env.response.status_code = 403
 end
 
 Kemal.run
