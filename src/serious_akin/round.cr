@@ -50,7 +50,11 @@ module SeriousAkin
       if set.size > 1
         @next_action = {ActionType::Question, db.best_question(set, history)}
       else
-        @next_action = {ActionType::Guess, set.first || ""}
+        if guess = set.first?
+          @next_action = {ActionType::Guess, guess}
+        else
+          @next_action = {ActionType::Input, ""}
+        end
       end
     end
 
