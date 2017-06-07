@@ -15,7 +15,6 @@ MAX_QUESTIONS = 20
 def do_action(env, obj)
   text = obj.next_action[1]
   obj.last_action = obj.next_action
-  p "saving: #{obj.inspect}"
   env.session.object("history", obj)
   case obj.next_action[0]
   when .question?
@@ -43,7 +42,6 @@ end
 
 get "/answer/:ans" do |env|
   obj = env.session.object("history").as(SeriousAkin::Round)
-  p obj
   ans = SeriousAkin::Answer.parse? env.params.url["ans"]
   if ans
     obj.process_question ans
@@ -53,7 +51,6 @@ end
 
 get "/guess/:ans" do |env|
   obj = env.session.object("history").as(SeriousAkin::Round)
-  p obj
   ans = env.params.url["ans"] != "no"
   obj.process_guess ans
   do_action(env, obj)
@@ -61,7 +58,6 @@ end
 
 get "/save" do |env|
   obj = env.session.object("history").as(SeriousAkin::Round)
-  p obj
   obj.process_input env.params.query["what"], env.params.query["diff"]
   do_action(env, obj)
 end
