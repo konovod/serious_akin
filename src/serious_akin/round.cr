@@ -17,16 +17,15 @@ module SeriousAkin
 
   class Round
     JSON.mapping({
-      history:         History,
-      last_action_id:  Int32,
-      last_action_str: String,
-      counter:         Int32,
+      history:     History,
+      last_action: Action,
+      counter:     Int32,
     })
     include Session::StorableObject
 
-    def last_action
-      {ActionType.new(@last_action_id), @last_action_str}
-    end
+    # def last_action
+    #   {ActionType.new(@last_action_id), @last_action_str}
+    # end
 
     getter next_action : Action = {ActionType::Restart, ""}
 
@@ -36,8 +35,7 @@ module SeriousAkin
 
     def initialize
       @history = History.new
-      @last_action_id = 0
-      @last_action_str = "???"
+      @last_action = RESTART
       @counter = 0
     end
 

@@ -14,7 +14,8 @@ MAX_QUESTIONS = 20
 
 def do_action(env, obj)
   text = obj.next_action[1]
-  p obj
+  obj.last_action = obj.next_action
+  p "saving: #{obj.inspect}"
   env.session.object("history", obj)
   case obj.next_action[0]
   when .question?
@@ -24,6 +25,7 @@ def do_action(env, obj)
   when .input?
     render "src/views/input.ecr", "src/views/layout.ecr"
   when .won?
+    env.session.destroy
     render "src/views/won.ecr", "src/views/layout.ecr"
   else
     # env.session.destroy

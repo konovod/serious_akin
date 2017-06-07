@@ -44,21 +44,4 @@ loop do
     puts "УРА"
     round.process_won
   end
-
-  # while set.size > 1
-  #   question = db.best_question(set, history)
-  #   ans = input_ans(question)
-  #   db.partition(set, question, ans)
-  #   history[question] = ans
-  # end
-  # guess = set.first.not_nil!
-  # case input_ans "Это #{guess}! Я угадал"
-  # when .no?
-  #   what = input_str("Тогда кто это")
-  #   diff = input_str("Чем отличается от #{guess}")
-  #   db.add_record what, diff, history
-  #   db.update_record guess, {diff => Answer::No}
-  # else
-  #   puts "УРА"
-  # end
 end
