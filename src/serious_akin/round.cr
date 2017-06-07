@@ -4,11 +4,11 @@ require "./trivial.cr"
 
 module SeriousAkin
   enum ActionType
+    Restart
     Question
     Guess
     Input
     Won
-    Restart
   end
 
   alias Action = {ActionType, String}
@@ -17,11 +17,16 @@ module SeriousAkin
 
   class Round
     JSON.mapping({
-      history:     History,
-      last_action: Action,
-      counter:     Int32,
+      history:         History,
+      last_action_id:  Int32,
+      last_action_str: String,
+      counter:         Int32,
     })
     include Session::StorableObject
+
+    def last_action
+      {ActionType.new(@last_action_id), @last_action_str}
+    end
 
     getter next_action : Action = {ActionType::Restart, ""}
 
@@ -31,7 +36,8 @@ module SeriousAkin
 
     def initialize
       @history = History.new
-      @last_action = RESTART
+      @last_action_id = 0
+      @last_action_str = "???"
       @counter = 0
     end
 
@@ -60,7 +66,7 @@ module SeriousAkin
     end
 
     def process_question(answer)
-      history[@last_action[1]] = answer
+      history[last_action[1]] = answer
       gen_next_question
     end
 
@@ -68,13 +74,13 @@ module SeriousAkin
       if ok
         @next_action = {ActionType::Won, ""}
       else
-        @next_action = {ActionType::Input, @last_action[1]}
+        @next_action = {ActionType::Input, last_action[1]}
       end
     end
 
     def process_input(what, diff)
       db.add_record what, diff, history
-      db.update_record @last_action[1], {diff => Answer::No}
+      db.update_record last_action[1], {diff => Answer::No}
       @next_action = RESTART
     end
   end

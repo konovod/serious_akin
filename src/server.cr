@@ -14,6 +14,7 @@ MAX_QUESTIONS = 20
 
 def do_action(env, obj)
   text = obj.next_action[1]
+  p obj
   env.session.object("history", obj)
   case obj.next_action[0]
   when .question?
@@ -25,11 +26,10 @@ def do_action(env, obj)
   when .won?
     render "src/views/won.ecr", "src/views/layout.ecr"
   else
-    env.session.destroy
+    # env.session.destroy
     obj = SeriousAkin::Round.new
-    text = obj.next_action[1]
-    env.session.object("history", obj)
-    render "src/views/question.ecr", "src/views/layout.ecr"
+    obj.process_start
+    do_action(env, obj)
   end
 end
 
@@ -41,6 +41,7 @@ end
 
 get "/answer/:ans" do |env|
   obj = env.session.object("history").as(SeriousAkin::Round)
+  p obj
   ans = SeriousAkin::Answer.parse? env.params.url["ans"]
   if ans
     obj.process_question ans
@@ -50,16 +51,16 @@ end
 
 get "/guess/:ans" do |env|
   obj = env.session.object("history").as(SeriousAkin::Round)
+  p obj
   ans = env.params.url["ans"] != "no"
-  if ans
-    obj.process_guess ans
-  end
+  obj.process_guess ans
   do_action(env, obj)
 end
 
 get "/save" do |env|
   obj = env.session.object("history").as(SeriousAkin::Round)
-  obj.process_input "what", "diff"
+  p obj
+  obj.process_input env.params.query["what"], env.params.query["diff"]
   do_action(env, obj)
 end
 
