@@ -29,6 +29,7 @@ loop do
   case round.next_action[0]
   when .restart?
     puts "-----------НОВЫЙ РАУНД----------"
+    # round = Round.new
     round.process_start
   when .question?
     ans = input_ans(round.next_action[1])

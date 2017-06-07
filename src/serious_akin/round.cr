@@ -40,7 +40,7 @@ module SeriousAkin
     end
 
     def gen_set
-      set = db.all_items
+      set = db.all_items.dup
       history.each { |q, ans| db.partition(set, q, ans) }
       set
     end
