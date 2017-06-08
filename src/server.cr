@@ -5,6 +5,8 @@ require "./serious_akin"
 require "./serious_akin"
 
 Session.config.secret = SecureRandom.hex(64)
+# i hope they won't eat user disk
+Session.config.cookie_name = "akin_#{SecureRandom.hex(64)}"
 
 db = SeriousAkin::TrivialDatabase.new
 db.add_record "кот", "длинный хвост"
@@ -60,6 +62,10 @@ get "/save" do |env|
   obj = env.session.object("history").as(SeriousAkin::Round)
   obj.process_input env.params.query["what"], env.params.query["diff"]
   do_action(env, obj)
+end
+
+get "/dump" do |env|
+  TrivialDatabase.instance
 end
 
 error 404 do
