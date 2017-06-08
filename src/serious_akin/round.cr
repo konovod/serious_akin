@@ -64,6 +64,7 @@ module SeriousAkin
     end
 
     def process_won
+      db.update_record last_action[1], history
       @next_action = RESTART
     end
 
