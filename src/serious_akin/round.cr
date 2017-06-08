@@ -64,7 +64,6 @@ module SeriousAkin
     end
 
     def process_won
-      db.update_record last_action[1], history
       @next_action = RESTART
     end
 
@@ -75,6 +74,7 @@ module SeriousAkin
 
     def process_guess(ok : Bool)
       if ok
+        db.update_record last_action[1], history
         @next_action = {ActionType::Won, ""}
       else
         @next_action = {ActionType::Input, last_action[1]}

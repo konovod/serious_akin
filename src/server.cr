@@ -65,7 +65,8 @@ get "/save" do |env|
 end
 
 get "/dump" do |env|
-  TrivialDatabase.instance
+  content = SeriousAkin::TrivialDatabase.instance.pretty_inspect(width = 79, newline = "</p><p>", indent = 0)
+  render "src/views/layout.ecr"
 end
 
 error 404 do
