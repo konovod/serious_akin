@@ -1,3 +1,4 @@
+require "yaml"
 require "./common"
 
 module SeriousAkin
@@ -26,7 +27,7 @@ module SeriousAkin
         @data.each do |(item, q1), ans|
           st[ans] += 1 if q1 == q && set.includes?(item)
         end
-        {st[Answer::Yes], st[Answer::No]}.min
+        {st[Answer::Yes], st[Answer::No]}.min * 100 + st[Answer::Unknown]
       end
     end
 
@@ -35,6 +36,27 @@ module SeriousAkin
         next if q1 != question
         next if ans == answer || ans == Answer::Unknown
         set.delete item
+      end
+    end
+
+    def dump_str
+      @data.map do |(item, q), ans|
+        [item, q, ans]
+      end.to_yaml
+    end
+
+    def load_str(s)
+      loaded = YAML.parse(s)
+      @all_items.clear
+      @all_questions.clear
+      @data.clear
+      loaded.each do |x|
+        item = x[0].as_s
+        q = x[1].as_s
+        ans = x[2].as_s.to_i
+        @data[{item, q}] = Answer.new(ans)
+        @all_items << item
+        @all_questions << q
       end
     end
   end

@@ -9,7 +9,12 @@ Session.config.secret = SecureRandom.hex(64)
 Session.config.cookie_name = "akin_#{SecureRandom.hex(64)}"
 
 db = SeriousAkin::TrivialDatabase.new
-db.add_record "кот", "длинный хвост"
+
+if File.exists? "./backup.yml"
+  db.load_str File.read("./backup.yml")
+else
+  db.add_record "кот", "длинный хвост"
+end
 SeriousAkin::TrivialDatabase.instance = db
 
 MAX_QUESTIONS = 20
@@ -64,8 +69,15 @@ get "/save" do |env|
   do_action(env, obj)
 end
 
-get "/dump" do |env|
+get "/debug" do |env|
   content = SeriousAkin::TrivialDatabase.instance.pretty_inspect(width = 79, newline = "</p><p>", indent = 0)
+  render "src/views/layout.ecr"
+end
+
+get "/dump" do |env|
+  db = SeriousAkin::TrivialDatabase.instance.not_nil!
+  File.write("./backup.yml", db.dump_str)
+  content = db.pretty_inspect(width = 79, newline = "</p><p>", indent = 0)
   render "src/views/layout.ecr"
 end
 

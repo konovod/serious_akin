@@ -43,6 +43,7 @@ loop do
     round.process_input what, diff
   when .won?
     puts "УРА"
+    db.load_str db.dump_str
     round.process_won
   end
 end
