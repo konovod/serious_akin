@@ -46,14 +46,18 @@ module SeriousAkin
     end
 
     def gen_next_question
+      @counter += 1
       set = gen_set
-      if set.size > 1
+      if set.size > 1 && @counter <= 20
         @next_action = {ActionType::Question, db.best_question(set, history)}
       else
-        if guess = set.first?
-          @next_action = {ActionType::Guess, guess}
-        else
+        case set.size
+        when 0
           @next_action = {ActionType::Input, ""}
+        when 1
+          @next_action = {ActionType::Guess, set.first}
+        else
+          @next_action = {ActionType::Guess, db.best_guess(set, history)}
         end
       end
     end

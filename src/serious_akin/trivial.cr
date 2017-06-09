@@ -31,6 +31,14 @@ module SeriousAkin
       end
     end
 
+    def best_guess(set, history)
+      set.to_a.shuffle.max_by do |item|
+        history.sum do |q, ans|
+          @data[{item, q}] != Answer::Unknown ? 1 : 0
+        end
+      end
+    end
+
     def partition(set, question, answer)
       @data.each do |(item, q1), ans|
         next if q1 != question
